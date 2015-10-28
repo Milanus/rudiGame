@@ -17,6 +17,7 @@ import org.andengine.entity.particle.emitter.RectangleParticleEmitter;
 import org.andengine.entity.particle.initializer.ExpireParticleInitializer;
 import org.andengine.entity.particle.initializer.VelocityParticleInitializer;
 import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.scene.background.EntityBackground;
 import org.andengine.entity.scene.background.SpriteBackground;
 import org.andengine.entity.sprite.Sprite;
@@ -57,6 +58,11 @@ public class GameActiviry extends BaseGameActivity {
 	public ITextureRegion back_image;
 	public ITextureRegion back_arrow;
 	public Sprite backSpriteStngs;
+	private Sprite backArrowSprite;
+	private Scene gameScene;
+	private Sprite play_btnSprite;
+	
+	private Scene menuScene;
 	
 	private Boolean settingsChanger = false;
 
@@ -95,7 +101,11 @@ public class GameActiviry extends BaseGameActivity {
 	@Override
 	public void onCreateScene(OnCreateSceneCallback pOnCreateSceneCallback)
 			throws IOException {
-		pOnCreateSceneCallback.onCreateSceneFinished(menuScene());
+		if (!settingsChanger) {
+			pOnCreateSceneCallback.onCreateSceneFinished(menuScene()); 
+		} else {
+			pOnCreateSceneCallback.onCreateSceneFinished(gameSceneLoad());
+		}
 		
 	}
 
@@ -103,45 +113,65 @@ public class GameActiviry extends BaseGameActivity {
 	public void onPopulateScene(Scene pScene,
 			OnPopulateSceneCallback pOnPopulateSceneCallback)
 			throws IOException {
-
 		pOnPopulateSceneCallback.onPopulateSceneFinished();
 		
 	}
 	private Scene menuScene () {
-		final Scene myScene = new Scene ();
+		menuScene = new Scene ();
 		
 		Sprite mySprite = new Sprite(CAMERA_WIDTH/2, CAMERA_HEIGHT/2, backround, getVertexBufferObjectManager());
 		SpriteBackground back = new SpriteBackground(mySprite);
-		myScene.setBackground(back);
+		menuScene.setBackground(back);
 		Sprite rudySprite = new Sprite(300, 135, rudy, getVertexBufferObjectManager());
-		final Sprite play_btnSprite = new Sprite(CAMERA_WIDTH/2,CAMERA_HEIGHT/2,play_btn, getVertexBufferObjectManager());
+		play_btnSprite = new Sprite(CAMERA_WIDTH/2,CAMERA_HEIGHT/2,play_btn, getVertexBufferObjectManager()) {
+			@Override
+			public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
+					float pTouchAreaLocalX, float pTouchAreaLocalY) {
+				if (pSceneTouchEvent.isActionDown()) {
+					
+				}
+				return super
+						.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX, pTouchAreaLocalY);
+			}
+		};
 		final Sprite share_btnSprite = new Sprite(50, 50, share_btn, getVertexBufferObjectManager()) ;
-		final Sprite backArrowSprite = new Sprite(50, 50, back_arrow, getVertexBufferObjectManager()) ;
-		Log.d("Button", "button was pressed");
+		backArrowSprite = new Sprite(50, 50, back_arrow, getVertexBufferObjectManager()) {
+		 @Override
+		public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
+				float pTouchAreaLocalX, float pTouchAreaLocalY) {
+				if (pSceneTouchEvent.isActionDown()) {
+					menuScene.attachChild(play_btnSprite);
+					menuScene.detachChild(backSpriteStngs);
+					if (backArrowSprite != null) {
+						menuScene.detachChild(backArrowSprite);
+						settingsChanger = true;
+					}
+					menuScene.attachChild(share_btnSprite);
+					menuScene.unregisterTouchArea(backArrowSprite);
+					backSpriteStngs = null;
+				}
+			// TODO Auto-generated method stub
+			return super
+					.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX, pTouchAreaLocalY);
+			
+		}
+		};
 		Sprite settings_btnSprite = new Sprite(400, 700, settings_btn, getVertexBufferObjectManager()) {
 			@Override
 			public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
 					float pTouchAreaLocalX, float pTouchAreaLocalY) {
 				Log.d("AndEngine", "button was pressed");
 				if (pSceneTouchEvent.isActionDown()) {
-					if (!settingsChanger) {
 						if (backSpriteStngs == null) {
 							backSpriteStngs = new Sprite(CAMERA_WIDTH / 2,
 									CAMERA_HEIGHT / 2, back_image,
 									getVertexBufferObjectManager());
-							myScene.attachChild(backSpriteStngs);
-							myScene.detachChild(play_btnSprite);
-							myScene.detachChild(share_btnSprite);
-							settingsChanger = true;
-							
+							menuScene.attachChild(backArrowSprite);
+							menuScene.attachChild(backSpriteStngs);
+							menuScene.registerTouchArea(backArrowSprite);
+							menuScene.detachChild(play_btnSprite);
+							menuScene.detachChild(share_btnSprite);
 						}
-					} else {
-						myScene.attachChild(play_btnSprite);
-						myScene.detachChild(backSpriteStngs);
-						myScene.attachChild(share_btnSprite);
-						backSpriteStngs = null;
-						settingsChanger = false;
-					}
 				}
 				return true;
 			}
@@ -149,19 +179,21 @@ public class GameActiviry extends BaseGameActivity {
 		
 		 
 //		myScene.attachChild(cloudSprite);
-		myScene.attachChild(rudySprite);
-		myScene.attachChild(moonRotation());
-		myScene.attachChild(moveSnow ());
-		myScene.attachChild(moveSnowTwo());
-		myScene.attachChild(moveSnowThree ());
-		myScene.attachChild(moveCload());
-		myScene.attachChild(settings_btnSprite);
-		myScene.registerTouchArea(settings_btnSprite);
-		myScene.attachChild(play_btnSprite);
-		myScene.attachChild(share_btnSprite);
+		menuScene.attachChild(rudySprite);
+		menuScene.attachChild(moonRotation());
+		menuScene.attachChild(moveSnow ());
+		menuScene.attachChild(moveSnowTwo());
+		menuScene.attachChild(moveSnowThree ());
+		menuScene.attachChild(moveCload());
+		menuScene.attachChild(settings_btnSprite);
+		menuScene.registerTouchArea(settings_btnSprite);
+		menuScene.registerTouchArea(play_btnSprite);
+		menuScene.attachChild(play_btnSprite);
+		menuScene.attachChild(share_btnSprite);
 		
 		
-		return myScene;
+		
+		return menuScene;
 	}
 	private BatchedSpriteParticleSystem moveSnow () {
 		BatchedSpriteParticleSystem particleCloudSys = new BatchedSpriteParticleSystem(new RectangleParticleEmitter(192,800,500, 150),
@@ -198,6 +230,17 @@ public class GameActiviry extends BaseGameActivity {
 		LoopEntityModifier loop = new LoopEntityModifier(rotation);
 		moonSprite.registerEntityModifier(loop);
 		return moonSprite;
+	}
+	private void unloadMenuScene () {
+		menuScene.clearChildScene();
+		menuScene.clearEntityModifiers();
+		menuScene.clearTouchAreas();
+	}
+	
+	private Scene gameSceneLoad () {
+		gameScene = new Scene();
+		gameScene.setBackground(new Background(Color.BLACK));
+		return gameScene;
 	}
 
 	
