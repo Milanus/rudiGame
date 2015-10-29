@@ -2,6 +2,7 @@ package com.schn.rudolfthereindeer;
 
 import java.io.IOException;
 
+import org.andengine.engine.Engine;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
@@ -57,14 +58,22 @@ public class GameActiviry extends BaseGameActivity {
 	public ITextureRegion share_btn;
 	public ITextureRegion back_image;
 	public ITextureRegion back_arrow;
-	public Sprite backSpriteStngs;
+	
+	private BatchedSpriteParticleSystem particleCloudSys;
+	private BatchedSpriteParticleSystem particleCloudSysSnowTwo;
+	private BatchedSpriteParticleSystem particleCloudSysSnowThree;
+	private BatchedSpriteParticleSystem particleCloudSysCloud;
+	
+	private Sprite backSpriteStngs;
 	private Sprite backArrowSprite;
-	private Scene gameScene;
 	private Sprite play_btnSprite;
+	private Sprite rudySprite;
+	private Sprite mySprite;
+	private Sprite moonSprite;
 	
 	private Scene menuScene;
-	
-	private Boolean settingsChanger = false;
+	private Scene gameScene;
+
 
 	@Override
 	public EngineOptions onCreateEngineOptions() {
@@ -101,12 +110,8 @@ public class GameActiviry extends BaseGameActivity {
 	@Override
 	public void onCreateScene(OnCreateSceneCallback pOnCreateSceneCallback)
 			throws IOException {
-		if (!settingsChanger) {
-			pOnCreateSceneCallback.onCreateSceneFinished(menuScene()); 
-		} else {
-			pOnCreateSceneCallback.onCreateSceneFinished(gameSceneLoad());
-		}
 		
+			pOnCreateSceneCallback.onCreateSceneFinished(menuScene()); 
 	}
 
 	@Override
@@ -118,17 +123,19 @@ public class GameActiviry extends BaseGameActivity {
 	}
 	private Scene menuScene () {
 		menuScene = new Scene ();
-		
-		Sprite mySprite = new Sprite(CAMERA_WIDTH/2, CAMERA_HEIGHT/2, backround, getVertexBufferObjectManager());
+		mySprite = new Sprite(CAMERA_WIDTH/2, CAMERA_HEIGHT/2, backround, getVertexBufferObjectManager());
 		SpriteBackground back = new SpriteBackground(mySprite);
 		menuScene.setBackground(back);
-		Sprite rudySprite = new Sprite(300, 135, rudy, getVertexBufferObjectManager());
+		rudySprite = new Sprite(300, 135, rudy, getVertexBufferObjectManager());
 		play_btnSprite = new Sprite(CAMERA_WIDTH/2,CAMERA_HEIGHT/2,play_btn, getVertexBufferObjectManager()) {
 			@Override
 			public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
 					float pTouchAreaLocalX, float pTouchAreaLocalY) {
 				if (pSceneTouchEvent.isActionDown()) {
-					
+					unloadMenuScene();
+//					Scene gameScene = new Scene ();
+//					gameScene.setBackground(new Background(Color.RED));
+//					getEngine().setScene(gameScene);
 				}
 				return super
 						.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX, pTouchAreaLocalY);
@@ -144,7 +151,7 @@ public class GameActiviry extends BaseGameActivity {
 					menuScene.detachChild(backSpriteStngs);
 					if (backArrowSprite != null) {
 						menuScene.detachChild(backArrowSprite);
-						settingsChanger = true;
+						
 					}
 					menuScene.attachChild(share_btnSprite);
 					menuScene.unregisterTouchArea(backArrowSprite);
@@ -196,36 +203,36 @@ public class GameActiviry extends BaseGameActivity {
 		return menuScene;
 	}
 	private BatchedSpriteParticleSystem moveSnow () {
-		BatchedSpriteParticleSystem particleCloudSys = new BatchedSpriteParticleSystem(new RectangleParticleEmitter(192,800,500, 150),
+		particleCloudSys = new BatchedSpriteParticleSystem(new RectangleParticleEmitter(192,800,500, 150),
 				2, 6,200, snowOne, getVertexBufferObjectManager());
 		particleCloudSys.addParticleInitializer(new VelocityParticleInitializer<UncoloredSprite>(10,0,-50,-90));
 		particleCloudSys.addParticleInitializer(new ExpireParticleInitializer<UncoloredSprite>(10f));
 		return particleCloudSys;
 	}
 	private BatchedSpriteParticleSystem moveSnowTwo () {
-		BatchedSpriteParticleSystem particleCloudSys = new BatchedSpriteParticleSystem(new RectangleParticleEmitter(180,800,500, 100 ),
+		particleCloudSysSnowTwo = new BatchedSpriteParticleSystem(new RectangleParticleEmitter(180,800,500, 100 ),
 				4, 10,200, snowTwo, getVertexBufferObjectManager());
-		particleCloudSys.addParticleInitializer(new VelocityParticleInitializer<UncoloredSprite>(0,20,-10,-50));
-		particleCloudSys.addParticleInitializer(new ExpireParticleInitializer<UncoloredSprite>(20f));
-		return particleCloudSys;
+		particleCloudSysSnowTwo.addParticleInitializer(new VelocityParticleInitializer<UncoloredSprite>(0,20,-10,-50));
+		particleCloudSysSnowTwo.addParticleInitializer(new ExpireParticleInitializer<UncoloredSprite>(20f));
+		return particleCloudSysSnowTwo;
 	}
 
 	private BatchedSpriteParticleSystem moveSnowThree () {
-		BatchedSpriteParticleSystem particleCloudSys = new BatchedSpriteParticleSystem(new RectangleParticleEmitter(180,800,500, 100 ),
+		particleCloudSysSnowThree = new BatchedSpriteParticleSystem(new RectangleParticleEmitter(180,800,500, 100 ),
 				4, 10,200, snowThree, getVertexBufferObjectManager());
-		particleCloudSys.addParticleInitializer(new VelocityParticleInitializer<UncoloredSprite>(-30,0,-20,-60));
-		particleCloudSys.addParticleInitializer(new ExpireParticleInitializer<UncoloredSprite>(20f));
-		return particleCloudSys;
+		particleCloudSysSnowThree.addParticleInitializer(new VelocityParticleInitializer<UncoloredSprite>(-30,0,-20,-60));
+		particleCloudSysSnowThree.addParticleInitializer(new ExpireParticleInitializer<UncoloredSprite>(20f));
+		return particleCloudSysSnowThree;
 	}
 	private BatchedSpriteParticleSystem moveCload () {
-		BatchedSpriteParticleSystem particleCloudSys = new BatchedSpriteParticleSystem(new RectangleParticleEmitter(-200,600,100, 500 ),
+		 particleCloudSysCloud = new BatchedSpriteParticleSystem(new RectangleParticleEmitter(-200,600,100, 500 ),
 				1, 1,50, cloud, getVertexBufferObjectManager());
-		particleCloudSys.addParticleInitializer(new VelocityParticleInitializer<UncoloredSprite>(30,-20,0,-10));
-		particleCloudSys.addParticleInitializer(new ExpireParticleInitializer<UncoloredSprite>(50f));
-		return particleCloudSys;
+		 particleCloudSysCloud.addParticleInitializer(new VelocityParticleInitializer<UncoloredSprite>(30,-20,0,-10));
+		 particleCloudSysCloud.addParticleInitializer(new ExpireParticleInitializer<UncoloredSprite>(50f));
+		return particleCloudSysCloud;
 	}
 	private Sprite moonRotation () {
-		Sprite moonSprite = new Sprite(100, 500, moon, getVertexBufferObjectManager());
+		moonSprite = new Sprite(100, 500, moon, getVertexBufferObjectManager());
 		RotationModifier rotation = new RotationModifier(20, 0, 360);
 		LoopEntityModifier loop = new LoopEntityModifier(rotation);
 		moonSprite.registerEntityModifier(loop);
@@ -235,6 +242,18 @@ public class GameActiviry extends BaseGameActivity {
 		menuScene.clearChildScene();
 		menuScene.clearEntityModifiers();
 		menuScene.clearTouchAreas();
+		rudySprite.detachSelf();
+		 particleCloudSys.detachSelf();
+		 particleCloudSysSnowTwo.detachSelf();
+		 particleCloudSysSnowThree.detachSelf();
+		 particleCloudSysCloud.detachSelf();
+//		 backSpriteStngs.detachSelf();
+//		 backArrowSprite.detachSelf();
+		 play_btnSprite.detachSelf();
+		 rudySprite.detachSelf();
+		 mySprite.detachSelf();
+		 moonSprite.detachSelf();
+		//particleCloudSys.detachSelf();
 	}
 	
 	private Scene gameSceneLoad () {
