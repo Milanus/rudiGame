@@ -18,6 +18,9 @@ public class ResourcesManager {
 	
 	private static ResourcesManager INSTANCE = null;
 	private BuildableBitmapTextureAtlas gameTextureAtlas;
+	
+	private BuildableBitmapTextureAtlas gameSceneTextureAtlas;
+	
 	public GameActiviry activity;
 	public Engine engine;
 	public Camera camera;
@@ -37,6 +40,10 @@ public class ResourcesManager {
 	public ITextureRegion share_btn;
 	public ITextureRegion back_image;
 	public ITextureRegion back_arrow;
+	
+	//game resources
+	public ITextureRegion gameBackround;
+	public ITextureRegion gameCloud;
 	
 	
 	public static ResourcesManager getInstance () {
@@ -67,10 +74,16 @@ public class ResourcesManager {
 		share_btn = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameTextureAtlas, activity.getAssets(), "share_btn.png");
 		back_image =  BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameTextureAtlas, activity.getAssets(), "settings_back.png");
 		back_arrow =  BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameTextureAtlas, activity.getAssets(), "back_arrow.png");
-
+		
+		gameSceneTextureAtlas = new BuildableBitmapTextureAtlas(activity.getTextureManager(), 1024, 1024, BitmapTextureFormat.RGBA_8888,TextureOptions.NEAREST);
+		gameBackround = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameSceneTextureAtlas, activity.getAssets(), "game_back.png");
+		gameCloud = BitmapTextureAtlasTextureRegionFactory.createFromAsset(gameSceneTextureAtlas, activity.getAssets(), "cloud_game.png");
 		try {
 			gameTextureAtlas.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(2, 0, 2));
 			gameTextureAtlas.load();
+			
+			gameSceneTextureAtlas.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(2, 0, 2));
+			gameSceneTextureAtlas.load();
 		} catch (TextureAtlasBuilderException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

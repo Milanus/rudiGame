@@ -11,6 +11,7 @@ import org.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
 import org.andengine.engine.options.resolutionpolicy.IResolutionPolicy;
 import org.andengine.entity.Entity;
 import org.andengine.entity.modifier.LoopEntityModifier;
+import org.andengine.entity.modifier.MoveXModifier;
 import org.andengine.entity.modifier.RotationModifier;
 import org.andengine.entity.particle.BatchedPseudoSpriteParticleSystem;
 import org.andengine.entity.particle.BatchedSpriteParticleSystem;
@@ -70,9 +71,17 @@ public class GameActiviry extends BaseGameActivity {
 	private Sprite rudySprite;
 	private Sprite mySprite;
 	private Sprite moonSprite;
+	private Sprite settings_btnSprite;
+	private Sprite share_btnSprite;
 	
 	private Scene menuScene;
 	private Scene gameScene;
+	
+	private ITextureRegion gameBackround;
+	private ITextureRegion gameCloud;
+	
+	private Sprite gameBackRoundSprite;
+	private Sprite gameCloudSprite;
 
 
 	@Override
@@ -103,6 +112,10 @@ public class GameActiviry extends BaseGameActivity {
 		share_btn = ResourcesManager.getInstance().share_btn;
 		back_image = ResourcesManager.getInstance().back_image;
 		back_arrow = ResourcesManager.getInstance().back_arrow;
+		
+		// game resources 
+		gameBackround = ResourcesManager.getInstance().gameBackround;
+		gameCloud = ResourcesManager.getInstance().gameCloud;
 		pOnCreateResourcesCallback.onCreateResourcesFinished();
 		
 	}
@@ -121,11 +134,12 @@ public class GameActiviry extends BaseGameActivity {
 		pOnPopulateSceneCallback.onPopulateSceneFinished();
 		
 	}
+	// adding menu scene
 	private Scene menuScene () {
 		menuScene = new Scene ();
 		mySprite = new Sprite(CAMERA_WIDTH/2, CAMERA_HEIGHT/2, backround, getVertexBufferObjectManager());
-		SpriteBackground back = new SpriteBackground(mySprite);
-		menuScene.setBackground(back);
+//		back = new SpriteBackground(mySprite);
+//		menuScene.setBackground(back);
 		rudySprite = new Sprite(300, 135, rudy, getVertexBufferObjectManager());
 		play_btnSprite = new Sprite(CAMERA_WIDTH/2,CAMERA_HEIGHT/2,play_btn, getVertexBufferObjectManager()) {
 			@Override
@@ -133,15 +147,13 @@ public class GameActiviry extends BaseGameActivity {
 					float pTouchAreaLocalX, float pTouchAreaLocalY) {
 				if (pSceneTouchEvent.isActionDown()) {
 					unloadMenuScene();
-//					Scene gameScene = new Scene ();
-//					gameScene.setBackground(new Background(Color.RED));
-//					getEngine().setScene(gameScene);
+				getEngine().setScene(gameSceneLoad());
 				}
 				return super
 						.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX, pTouchAreaLocalY);
 			}
 		};
-		final Sprite share_btnSprite = new Sprite(50, 50, share_btn, getVertexBufferObjectManager()) ;
+		share_btnSprite = new Sprite(50, 50, share_btn, getVertexBufferObjectManager()) ;
 		backArrowSprite = new Sprite(50, 50, back_arrow, getVertexBufferObjectManager()) {
 		 @Override
 		public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
@@ -163,7 +175,7 @@ public class GameActiviry extends BaseGameActivity {
 			
 		}
 		};
-		Sprite settings_btnSprite = new Sprite(400, 700, settings_btn, getVertexBufferObjectManager()) {
+		settings_btnSprite = new Sprite(400, 700, settings_btn, getVertexBufferObjectManager()) {
 			@Override
 			public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
 					float pTouchAreaLocalX, float pTouchAreaLocalY) {
@@ -186,6 +198,7 @@ public class GameActiviry extends BaseGameActivity {
 		
 		 
 //		myScene.attachChild(cloudSprite);
+		menuScene.attachChild(mySprite);
 		menuScene.attachChild(rudySprite);
 		menuScene.attachChild(moonRotation());
 		menuScene.attachChild(moveSnow ());
@@ -253,12 +266,22 @@ public class GameActiviry extends BaseGameActivity {
 		 rudySprite.detachSelf();
 		 mySprite.detachSelf();
 		 moonSprite.detachSelf();
+		 moonSprite.clearEntityModifiers();
+		 settings_btnSprite.detachSelf();
+		 share_btnSprite.detachSelf();
 		//particleCloudSys.detachSelf();
 	}
 	
 	private Scene gameSceneLoad () {
 		gameScene = new Scene();
-		gameScene.setBackground(new Background(Color.BLACK));
+		gameBackRoundSprite = new Sprite(CAMERA_WIDTH/2, CAMERA_HEIGHT/2, gameBackround,getVertexBufferObjectManager());
+		gameCloudSprite = new Sprite(CAMERA_WIDTH/3, CAMERA_HEIGHT/3, gameCloud,getVertexBufferObjectManager());
+		MoveXModifier cloaudMove = new MoveXModifier(20, gameCloud.getWidth(), CAMERA_WIDTH+gameCloud.getWidth());
+		gameCloudSprite.registerEntityModifier(cloaudMove);
+		gameScene.attachChild(gameBackRoundSprite);
+		gameScene.attachChild(moonSprite);
+		gameScene.attachChild(rudySprite);
+		gameScene.attachChild(gameCloudSprite);
 		return gameScene;
 	}
 
