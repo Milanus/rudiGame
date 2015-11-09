@@ -1,9 +1,13 @@
 package com.schn.rudolfthereindeer;
 
 import java.io.IOException;
+import java.util.Random;
 
 import org.andengine.engine.Engine;
 import org.andengine.engine.camera.Camera;
+import org.andengine.engine.handler.IUpdateHandler;
+import org.andengine.engine.handler.timer.ITimerCallback;
+import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.WakeLockOptions;
@@ -44,6 +48,8 @@ import android.view.Display;
 
 public class GameActiviry extends BaseGameActivity {
 	
+	private static final String ANDLOG = "AndEngine";
+	
 	private static final int CAMERA_WIDTH = 480;
 	private static final int CAMERA_HEIGHT = 800;
 	ITextureRegion backroundRegion;
@@ -82,6 +88,8 @@ public class GameActiviry extends BaseGameActivity {
 	
 	private Sprite gameBackRoundSprite;
 	private Sprite gameCloudSprite;
+	
+	private MoveXModifier cloaudMove;
 
 
 	@Override
@@ -273,11 +281,29 @@ public class GameActiviry extends BaseGameActivity {
 	}
 	
 	private Scene gameSceneLoad () {
+		final Random rand = new Random();
 		gameScene = new Scene();
 		gameBackRoundSprite = new Sprite(CAMERA_WIDTH/2, CAMERA_HEIGHT/2, gameBackround,getVertexBufferObjectManager());
-		gameCloudSprite = new Sprite(CAMERA_WIDTH/3, CAMERA_HEIGHT/3, gameCloud,getVertexBufferObjectManager());
-		MoveXModifier cloaudMove = new MoveXModifier(20, gameCloud.getWidth(), CAMERA_WIDTH+gameCloud.getWidth());
+		gameCloudSprite = new Sprite(CAMERA_WIDTH/3, rand.nextInt(CAMERA_HEIGHT/3), gameCloud,getVertexBufferObjectManager());
+		cloaudMove = new MoveXModifier(10, 0, CAMERA_WIDTH+gameCloud.getWidth());
 		gameCloudSprite.registerEntityModifier(cloaudMove);
+		gameCloudSprite.registerUpdateHandler(new IUpdateHandler() {
+			
+			@Override
+			public void reset() {
+			
+			}
+			
+			@Override
+			public void onUpdate(float pSecondsElapsed) {
+				if (gameCloudSprite.getX()>CAMERA_WIDTH+gameCloudSprite.getWidth()/2) {
+					gameCloudSprite.setY(rand.nextInt(CAMERA_HEIGHT/2));
+					cloaudMove.reset();;	
+				}
+				Log.d(ANDLOG, "cordinates" + gameCloudSprite.getX());
+				
+			}
+		});
 		gameScene.attachChild(gameBackRoundSprite);
 		gameScene.attachChild(moonSprite);
 		gameScene.attachChild(rudySprite);
